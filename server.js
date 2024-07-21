@@ -2,6 +2,7 @@
 // We begin by loading Express
 require('dotenv').config();
 const express = require('express');
+const methodOverride = require('method-override');
 const morgan = require('morgan');
 
 // DATABASE
@@ -14,6 +15,7 @@ const app = express();
 // MIDDLEWARE
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride('_method'));
 
 // ROUTES
 
@@ -50,6 +52,27 @@ app.get('/fruits', async (req, res, next) => {
 app.get('/fruits/:fruitId', async (req, res, next) => {
   const fruit = await Fruit.findById(req.params.fruitId);
   res.render('fruits/show.ejs', { fruit });
+});
+
+app.delete('/fruits/:fruitId', async (req, res, next) => {
+  await Fruit.findByIdAndDelete(req.params.fruitId);
+  res.redirect('/fruits');
+});
+
+app.get('/fruits/:fruitId/edit', async (req, res, next) => {
+  const fruit = await Fruit.findById(req.params.fruitId);
+  res.render('fruits/edit.ejs', { fruit });
+});
+
+app.put('/fruits/:fruitId', async (req, res, next) => {
+  if (req.body.isReadyToEat === 'on') {
+    req.body.isReadyToEat = true;
+  } else {
+    req.body.isReadyToEat = false;
+  }
+
+  await Fruit.findByIdAndUpdate(req.params.fruitId, req.body);
+  res.redirect(`/fruits/${req.params.fruitId}`);
 });
 
 app.listen(3000, () => {
