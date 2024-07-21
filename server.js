@@ -38,7 +38,13 @@ app.post('/fruits', async (req, res, next) => {
 
   // inser the req body into the database
   await Fruit.create(req.body);
-  res.redirect('/fruits/new');
+  res.redirect('/fruits');
+});
+
+app.get('/fruits', async (req, res, next) => {
+  const fruits = await Fruit.find();
+
+  res.render('fruits/index.ejs', { fruits });
 });
 
 app.listen(3000, () => {
